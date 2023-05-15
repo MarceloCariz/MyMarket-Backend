@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  db:
+    image: mongo:5
+    container_name: app-mern-db
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_DATABASE: app
+    volumes:
+      - ./mongo_data:/data/db
