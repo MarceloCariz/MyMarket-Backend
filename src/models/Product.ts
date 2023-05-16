@@ -1,10 +1,11 @@
-import { Schema, model } from "mongoose";
+import { Schema, SchemaDefinitionProperty, model } from "mongoose";
 
-export interface ProductI {
+export interface ProductI{
     title:string,
     description: string,
     price: Number,
     stock: Number,
+    shop: SchemaDefinitionProperty<string>,
     category?: string[],
 }
 
@@ -26,6 +27,11 @@ const ProductSchema = new  Schema<ProductI>({
         type: Number,
         require: true
     },
+    shop:{
+        type: Schema.Types.ObjectId,
+        ref: "shops",
+        required: true,
+    }
 });
 
-export default model('product', ProductSchema);
+export default model('Product', ProductSchema);

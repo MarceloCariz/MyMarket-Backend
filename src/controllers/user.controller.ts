@@ -13,6 +13,7 @@ export const createUser = async (req:Request, res:Response) => {
 
         //Crear el usuario
         const user = await User.create(req.body);
+
         
         //Encriptar contrasena
         const salt = bcrypt.genSaltSync();

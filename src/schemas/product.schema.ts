@@ -14,6 +14,8 @@ export const createProductSchema = z.object({
 
         stock: z.number({required_error: "EL stock requerido", invalid_type_error: "EL stock debe ser un numero"})
         .positive("El stock debe ser positivo"),
+
+        shop: z.string({required_error:"EL id de la tienda es obligatorio", invalid_type_error:"El id debe ser un string"}).nonempty("EL id de la tienda es obligatorio")
     
     })
 })

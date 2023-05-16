@@ -3,15 +3,29 @@ import bcrypt from 'bcryptjs';
 import User from "../models/User";
 import { generateJWT } from "../helpers/jwt";
 import { JWTRequestI } from "../middlewares/checkJWT.middleware";
+import Shop from "../models/Shop";
 
 
 export const login = async(req: Request, res: Response) => {
     const {email, password} = req.body;
     try {
+        let user = null;
+        let isUser = await User.findOne({email}); // Busca al usuario por email
+        let isShop = await Shop.findOne({email});
 
-        const user = await User.findOne({email}); // Busca al usuario por email
+        
+        if(isShop){
+            user = isShop;
+        }
+        if(isUser){
+            user = isUser;
+        }
 
-        if(!user) return res.status(400).json({message:"Email o contraseña incorrecto"});
+        if(!user){ 
+            return res.status(400).json({message:"Email o contraseña incorrecto"})
+        };
+
+
 
         //Validar passoword
         const validPassword = bcrypt.compareSync(password, user.password);
