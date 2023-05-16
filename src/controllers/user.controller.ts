@@ -1,15 +1,18 @@
 import { Request, Response } from "express";
 import bcrypt from 'bcryptjs';
 import User from "../models/User";
+import Shop from "../models/Shop";
 
 
 export const createUser = async (req:Request, res:Response) => {
     try {
         // Buscar usuario
-        const isUser = await User.findOne({email: req.body.email})
+        const isUser = await User.findOne({email: req.body.email});
+        const isShop = await Shop.findOne({email: req.body.email});
 
         //mandar mensaje si se encuentra
-        if(isUser) return res.status(400).json({message:"El usuario ya existe"})
+        if(isUser) return res.status(400).json({message:"El usuario ya existe"});
+        if(isShop) return res.status(400).json({message:"El usuario ya existe"});
 
         //Crear el usuario
         const user = await User.create(req.body);

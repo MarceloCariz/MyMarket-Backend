@@ -22,7 +22,7 @@ export const login = async(req: Request, res: Response) => {
         }
 
         if(!user){ 
-            return res.status(400).json({message:"Email o contraseña incorrecto"})
+            return res.status(401).json({message:"Email o contraseña incorrecto"})
         };
 
 
@@ -30,15 +30,15 @@ export const login = async(req: Request, res: Response) => {
         //Validar passoword
         const validPassword = bcrypt.compareSync(password, user.password);
 
-        if(!validPassword) return res.status(400).json({message:"Email o contraseña incorrecto"});
+        if(!validPassword) return res.status(401).json({message:"Email o contraseña incorrecto"});
 
         //Generar jwt
         const token = await generateJWT({uid: user.id, username: user.username, roles: user.roles});
 
         res.json({
-            uid: user.id,
-            username: user.username,
-            roles: user.roles,
+            // uid: user.id,
+            // username: user.username,
+            // roles: user.roles,
             token
         })
 
@@ -58,6 +58,9 @@ export const revalidateToken = async(req: JWTRequestI, res: Response) => {
     const token = await generateJWT({uid, username, roles});
 
     res.json({
+        uid,
+        username,
+        roles,
         token
     })
 

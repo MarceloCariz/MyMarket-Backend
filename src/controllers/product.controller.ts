@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Product from "../models/Product";
-import Shop from "../models/Shop";
+import Product, { ProductI } from "../models/Product";
+import Shop, { ShopI } from "../models/Shop";
 import { isObjectIdOrHexString } from "mongoose";
 
 
@@ -9,11 +9,22 @@ export const createProduct = async (req: Request,res: Response) => {
     try {
         const {shop} = req.body;
         //Verficar el id de la tienda
+        const files:any = req.files;
+        if(!files) return res.status(404).json({message: "Imagen no encontrada"});
+
+        // const imagen = req.files.image[0].filename;
+
         const isShop = await Shop.findById(shop);
         if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
 
+        const imageUrl  = files.image[0].filename
 
-        const product =  await Product.create(req.body);
+        const newProduct:ProductI = {
+            ...req.body,
+            imgUrl: `${process.env.HOST}/img/${imageUrl}`,
+        }
+
+        const product =  await Product.create(newProduct);
         await product.save();
 
         //Guardar el product en el array de product del comercio
@@ -55,17 +66,22 @@ export const getProductByShop = async(req: Request, res: Response) => {
 
 export const getAllProductsByShop = async (req: Request, res: Response) => {
     try {
-      // Realizar la agregación para agrupar los productos por comercio
-        const products = await Product.aggregate([
-            {
-                $group: {
-                    _id: "$shop",
-                    productos: { $push: "$$ROOT" }
-                },
-            }
-        ]);
+
+
+        const products = await Product.find({}).populate("shop");
+
+        const formateddProducts = products.map((product) => {
+            const {_id, title, price, description, stock, shop, imgUrl} = product;
+
+            const shopInfo:any = shop
+
+            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
+        })
+
+        
+
     
-        res.status(200).json(products);
+        res.status(200).json(formateddProducts);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Interal server error" });
@@ -76,7 +92,15 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
 
 
 
-
+      // Realizar la agregación para agrupar los productos por comercio
+        // const products = await Product.aggregate([
+        //     {
+        //         $group: {
+        //             _id: "$shop",
+        //             productos: { $push: "$$ROOT" }
+        //         },
+        //     }
+        // ]);
 
 // {
 //     $lookup: {

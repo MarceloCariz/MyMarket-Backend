@@ -3,6 +3,7 @@ import { Schema, SchemaDefinitionProperty, model } from "mongoose";
 export interface ProductI{
     title:string,
     description: string,
+    imgUrl: string,
     price: Number,
     stock: Number,
     shop: SchemaDefinitionProperty<string>,
@@ -23,13 +24,17 @@ const ProductSchema = new  Schema<ProductI>({
         type: String,
         required: false
     },
+    imgUrl: {
+        type: String,
+        required: true
+    },
     stock:{
         type: Number,
         require: true
     },
     shop:{
         type: Schema.Types.ObjectId,
-        ref: "shops",
+        ref: "Shop",
         required: true,
     }
 });

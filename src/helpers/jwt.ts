@@ -7,7 +7,7 @@ interface JwtI{
     roles: RolesEnum[]
 }
 
-export const generateJWT = ({uid, username, roles}:JwtI) => {
+export const generateJWT:any = ({uid, username, roles}:JwtI) => {
     return new Promise((resolve, reject) => {
 
         const payload = {uid, username, roles}; // Contenido del token

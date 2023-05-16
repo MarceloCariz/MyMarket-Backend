@@ -16,6 +16,10 @@ export const createShopSchema =z.object({
         username: z.string().nonempty("El nombre de usuario es requerido")
             .min(3, "Debe tener un minimo de 3 caracteres")
             .max(20,"No debe superar los 20 caracteres"),
+        
+        shopName: z.string().nonempty("El nombre de la tienda es requerido")
+        .min(3, "Debe tener un minimo de 3 caracteres")
+        .max(20,"No debe superar los 20 caracteres"),
     
         roles: z.nativeEnum(RolesEnum).array().nonempty("Se debe proporcionar un rol")
     })

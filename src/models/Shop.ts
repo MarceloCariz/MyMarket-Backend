@@ -3,6 +3,7 @@ import { RolesEnum } from "../enums/user.enum";
 
 export interface ShopI {
     username: string;
+    shopName: string;
     email: string;
     password: string;
     products: string[]; // Referencia a los IDs de los productos
@@ -13,6 +14,10 @@ const ShopSchema = new Schema<ShopI>({
     username: {
         type: String,
         required: true,
+    },
+    shopName:{
+        type: String,
+        required: true
     },
     password:{
         type: String,

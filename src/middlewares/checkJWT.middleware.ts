@@ -17,7 +17,7 @@ export interface JWTRequestI extends Request{
 const authenticateJWT = (req:JWTRequestI, res:Response, next: NextFunction) => {
 
     const token = req.header('Authorization')?.split(' ')[1]; // ['Bearer', 'token']  [1] = token
-    console.log(token)
+
     if(!token){
         return res.status(401).json({message: 'No se proporciono un token de autorizacion'})
     }
