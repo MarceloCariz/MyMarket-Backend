@@ -7,6 +7,7 @@ export interface ProductI{
     price: Number,
     stock: Number,
     shop: SchemaDefinitionProperty<string>,
+    publicId: string,
     category?: string[],
 }
 
@@ -27,6 +28,10 @@ const ProductSchema = new  Schema<ProductI>({
     imgUrl: {
         type: String,
         required: true
+    },
+    publicId: {
+        type: String,
+        required: true,
     },
     stock:{
         type: Number,

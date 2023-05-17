@@ -55,13 +55,38 @@ export const revalidateToken = async(req: JWTRequestI, res: Response) => {
     const username = req.username!;
     const roles = req.roles!;
 
-    const token = await generateJWT({uid, username, roles});
+    try {
 
-    res.json({
-        uid,
-        username,
-        roles,
-        token
-    })
+        const isUser = await User.findById(uid);
+        const isShop = await Shop.findById(uid);
+    
+        let user;
+    
+        if(isUser){
+            user = isUser;
+        }
+    
+        if(isShop){
+            user = isShop;
+        }
+
+        if(!user) return res.status(400).json({message: "Usuario no encontrado, no se puede revalidar el token"})
+
+        const token = await generateJWT({uid, username, roles});
+
+        res.json({
+            uid,
+            username,
+            roles,
+            token
+        })
+    } catch (error) {
+        res.status(400).json({message: "Usuario no encontrado, no se puede revalidar el token"})
+    }
+
+
+
+
+
 
 }

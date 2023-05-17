@@ -2,26 +2,48 @@ import { Request, Response } from "express";
 import Product, { ProductI } from "../models/Product";
 import Shop, { ShopI } from "../models/Shop";
 import { isObjectIdOrHexString } from "mongoose";
+import cloudinary from "../utils/cloudinary.config";
+import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
+
 
 
 
 export const createProduct = async (req: Request,res: Response) => {
     try {
+
+        
         const {shop} = req.body;
+
+        const file:any = req.file;
+
+        if(!file) return res.status(404).json({message: "Imagen no encontrada"});
+
         //Verficar el id de la tienda
-        const files:any = req.files;
-        if(!files) return res.status(404).json({message: "Imagen no encontrada"});
-
-        // const imagen = req.files.image[0].filename;
-
         const isShop = await Shop.findById(shop);
         if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
 
-        const imageUrl  = files.image[0].filename
+
+        //Subir imagen cloudinary
+        if(!req.file?.path) return  res.status(404).json({message: "Imagen no encontrada"});
+        
+        const cloudinaryResponse = await cloudinary.uploader.upload(req.file?.path, {
+            resource_type: "auto",
+            transformation: [
+                {height: 400, crop: "scale"},
+                {fetch_format: "webp"}
+            ]
+        });
+
+
+        const {secure_url, public_id} = cloudinaryResponse;
+
+
+
 
         const newProduct:ProductI = {
             ...req.body,
-            imgUrl: `${process.env.HOST}/img/${imageUrl}`,
+            imgUrl: secure_url,
+            publicId: public_id
         }
 
         const product =  await Product.create(newProduct);
@@ -29,13 +51,81 @@ export const createProduct = async (req: Request,res: Response) => {
 
         //Guardar el product en el array de product del comercio
         await Shop.findByIdAndUpdate(
-            shop,
-            {$push: {products: product._id}},
-            {new: true}
+                shop,
+                {$push: {products: product._id}},
+                {new: true}
         )
         res.status(201).json(product)
     } catch (error) {
+        console.log(error)
         res.status(500).json({message:"Interal server error"})
+    }
+}
+
+export const updateProduct = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const productId = req.params.productId;
+        // const {title, description, price, stock} = req.body;
+
+        const product = await Product.findById(productId);
+        if(!product) return res.status(404).json({message:"Producto no encontrado"});
+
+
+
+
+
+        const file:any = req.file; // imagen
+
+        if(file && file.path){
+            //eliminar image anterior
+            await cloudinary.uploader.destroy(product.publicId);
+            const cloudinaryResponse = await cloudinary.uploader.upload(file.path, {
+                resource_type: "auto",
+                transformation: [
+                    {height: 400, crop: "scale"},
+                    {fetch_format: "webp"}
+                ]
+            });
+
+            const {secure_url, public_id} = cloudinaryResponse;
+            product.imgUrl = secure_url;
+            product.publicId = public_id;
+            await product.save();
+        }
+
+        const productUpdated = await Product.findByIdAndUpdate(productId, {...req.body}, {new: true});
+
+        res.status(201).json(productUpdated)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId:any =  req.uid;
+        const productId = req.params.productId;
+        const isOwnerProduct = await Shop.findById(userId);
+        if(!isOwnerProduct) return res.status(404).json({message: "Producto no encontrado"});
+
+        const isProduct = isOwnerProduct?.products.find((p:any) => p._id.toString() === productId && p);
+
+
+
+        const product = await Product.findByIdAndDelete(isProduct);
+
+        await Shop.findByIdAndUpdate(userId, {
+            $pull: { products: isProduct }, // Elimina el productId del array products
+        });
+
+        if(product?.publicId){
+            await cloudinary.uploader.destroy(product.publicId);
+        }
+
+        return res.json({message: "Producto eliminado correctamente"})
+
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -49,7 +139,7 @@ export const getProductByShop = async(req: Request, res: Response) => {
         //Buscar el comercio por el id
         const shop = await Shop.findById(shopId).populate("products");
         if(!shop){
-            return res.status(404).json({message:"Comercio no encontrado"})
+            return res.status(404).json({message:"Aun no tienes productos"})
         }
 
         //Obtener los productos del comercio

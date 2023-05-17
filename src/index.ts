@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 import cors from 'cors';
 import multer from 'multer';
 import authRoutes from './routes/auth.routes';
@@ -12,12 +12,11 @@ import assign from './utils/multer.config';
 
 
 
-
 //Configuraciones
 const app = express();
+dotenv.config();
 app.use(express.json());
 app.use(cors());
-dotenv.config();
 app.use(express.static(path.join(__dirname, "public")));//directorio publico archivos e imagenes
 app.use(express.urlencoded({extended: false}))
 
@@ -25,7 +24,7 @@ app.use(express.urlencoded({extended: false}))
 
 
 
-app.use(multer({ storage: assign }).fields([{name: "image", maxCount: 1}, {name: "reporte", maxCount: 1}]));
+// app.use(multer({ storage: assign }).fields([{name: "image", maxCount: 1}, {name: "reporte", maxCount: 1}]));
 
 
 //Base de datos
