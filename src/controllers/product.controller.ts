@@ -23,9 +23,9 @@ export const createProduct = async (req: Request,res: Response) => {
         if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
 
 
-        //Subir imagen cloudinary
         if(!req.file?.path) return  res.status(404).json({message: "Imagen no encontrada"});
         
+        //Subir imagen cloudinary
         const cloudinaryResponse = await cloudinary.uploader.upload(req.file?.path, {
             resource_type: "auto",
             transformation: [
@@ -34,20 +34,21 @@ export const createProduct = async (req: Request,res: Response) => {
             ]
         });
 
-
+        // Rescatar url y id de la imagen
         const {secure_url, public_id} = cloudinaryResponse;
 
 
 
-
+        ///Producto con todos sus atributos
         const newProduct:ProductI = {
             ...req.body,
             imgUrl: secure_url,
             publicId: public_id
         }
 
+        //Crear producto
         const product =  await Product.create(newProduct);
-        await product.save();
+        await product.save(); //Guardar producto
 
         //Guardar el product en el array de product del comercio
         await Shop.findByIdAndUpdate(
@@ -105,13 +106,16 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
     try {
         const userId:any =  req.uid;
         const productId = req.params.productId;
+        
+        //Verificar si la tienda existe por ende el producto 
         const isOwnerProduct = await Shop.findById(userId);
         if(!isOwnerProduct) return res.status(404).json({message: "Producto no encontrado"});
 
+        //Verificar si el producto a elminar pertenece a la tienda
         const isProduct = isOwnerProduct?.products.find((p:any) => p._id.toString() === productId && p);
 
 
-
+        //Eliminar producto
         const product = await Product.findByIdAndDelete(isProduct);
 
         await Shop.findByIdAndUpdate(userId, {
@@ -137,13 +141,19 @@ export const getProductByShop = async(req: Request, res: Response) => {
         if(!isObjectIdOrHexString(shopId)) return res.status(404).json({message:"Id del comercio incorrecto"});
 
         //Buscar el comercio por el id
-        const shop = await Shop.findById(shopId).populate("products");
+        const shop = await Shop.findById(shopId).populate({
+            path: "products",
+            populate:{
+                path: "shop",
+                select: "shopName"
+            }
+        });
         if(!shop){
             return res.status(404).json({message:"Aun no tienes productos"})
         }
 
         //Obtener los productos del comercio
-        const products = shop.products;
+        const products = shop.products;   
 
         res.status(200).json(products);
 
