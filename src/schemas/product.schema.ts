@@ -27,7 +27,10 @@ export const createProductSchema = z.object({
         
 
     })
-})
+});
+
+/// pintar el mapa en el front, campturar localizacion , cargar mapa, cuasdricula , lat y long, hacer servicio qye guarde,
+/// cargar el mapa, 
 
 
 // "title": "Galletas",

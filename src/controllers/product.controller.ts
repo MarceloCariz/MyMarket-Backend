@@ -68,6 +68,7 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
         const productId = req.params.productId;
         // const {title, description, price, stock} = req.body;
 
+        // Validar si 
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
 
@@ -174,7 +175,7 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
             const {_id, title, price, description, stock, shop, imgUrl} = product;
 
             const shopInfo:any = shop
-
+            
             return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
         })
 
