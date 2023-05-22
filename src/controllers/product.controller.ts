@@ -7,7 +7,6 @@ import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware"
 
 
 
-
 export const createProduct = async (req: Request,res: Response) => {
     try {
 
@@ -71,9 +70,6 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
         // Validar si 
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
-
-
-
 
 
         const file:any = req.file; // imagen

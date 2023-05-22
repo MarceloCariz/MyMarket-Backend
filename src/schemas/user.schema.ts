@@ -18,7 +18,23 @@ export const createUserSchema = z.object({
     
         roles: z.nativeEnum(RolesEnum).array().nonempty("Se debe proporcionar un rol")
     })
-})
+});
+
+
+export const updateProfileUserSchema = z.object({
+    body: z.object({
+        name:z.string().nonempty("El nombre de usuario es requerido")
+        .min(3, "Debe tener un minimo de 3 caracteres")
+        .max(20,"No debe superar los 20 caracteres").optional(),
+
+        lastName: z.string().nonempty("El apellido del usuario es requerido")
+        .min(3, "Debe tener un minimo de 3 caracteres")
+        .max(20,"No debe superar los 20 caracteres").optional(),
+
+        address: z.string().min(5, "Debe tener un minimo de 3 caracteres")
+        .max(30,"No debe superar los 20 caracteres").optional(),
+    })
+});
 
 export const updateUserSchema = z.object({
     body: z.object({
