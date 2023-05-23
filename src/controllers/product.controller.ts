@@ -175,8 +175,6 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
             return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
         })
 
-        
-
     
         res.status(200).json(formateddProducts);
     } catch (error) {
@@ -185,6 +183,23 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
     }
 };
 
+
+export const searchProduct = async(req:Request, res:Response) => {
+    try {
+        const query = req.query.q;
+        if(!query) return res.status(404).json({message: "No se proporciono parametro de busqueda"});
+        const searchValue = query.toString();
+                
+        const regex = new RegExp(searchValue, 'i');
+
+        const products = await Product.find({'title': {$regex: regex}});
+
+        res.status(200).json(products);
+
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 
 
