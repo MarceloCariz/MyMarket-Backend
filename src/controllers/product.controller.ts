@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Product, { ProductI } from "../models/Product";
 import Shop, { ShopI } from "../models/Shop";
-import { isObjectIdOrHexString } from "mongoose";
+import { Error, SchemaDefinitionProperty, isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
 import Category, { CategoryI } from "../models/Category";
@@ -137,28 +137,23 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
 }
 
 
-export const getProductByShop = async(req: Request, res: Response) => {
+export const getProductByShop = async(  req: Request, res: Response) => {
     try {
         const {shopId} = req.params;
 
         if(!isObjectIdOrHexString(shopId)) return res.status(404).json({message:"Id del comercio incorrecto"});
 
         //Buscar el comercio por el id
-        const shop = await Shop.findById(shopId).populate({
-            path: "products",
-            populate:{
-                path: "shop",
-                select: "shopName"
-            }
-        });
-        if(!shop){
-            return res.status(404).json({message:"Aun no tienes productos"})
-        }
+        const shop = await Shop.findById(shopId);
+        if(!shop) return res.status(404).json({message:"El comercio no existe"});
 
-        //Obtener los productos del comercio
-        const products = shop.products;   
+        const products = await Product.find({'shop': shopId}).populate("shop").populate("category");
 
-        res.status(200).json(products);
+        const formateddProducts = productResponseFormat(products);
+
+
+
+        res.status(200).json(formateddProducts);
 
     } catch (error) {
         console.log(error)
@@ -173,17 +168,8 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
 
         const products = await Product.find({}).populate("shop").populate("category");
 
-        const formateddProducts = products.map((product) => {
-            const {_id, title, price, description, stock, shop, imgUrl, category} = product;
 
-            const shopInfo:any = shop
-            const categoryInfo = category as CategoryI;
-            
-            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id, categoryName: categoryInfo.categoryName }
-        })
-
-        
-
+        const formateddProducts = productResponseFormat(products);
     
         res.status(200).json(formateddProducts);
     } catch (error) {
@@ -193,34 +179,42 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
 };
 
 
+export const searchProduct = async(req:Request, res:Response) => {
+    try {
+        const query = req.query.q;
+        if(!query) return res.status(404).json({message: "No se proporciono parametro de busqueda"});
+        const searchValue = query.toString();
+                
+        const regex = new RegExp(searchValue, 'i');
+
+        const products = await Product.find({'title': {$regex: regex}}).populate("shop").populate("category");
+
+        
+        const formateddProducts = productResponseFormat(products);
+
+    
+        res.status(200).json(formateddProducts);
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+const productResponseFormat = (products: ProductI[]) => {
+    const formattedProducts = products.map((product:ProductI) => {
+        const {_id, title, price, description, stock, shop, imgUrl, category} = product;
+
+        const shopInfo = shop as ShopI;
+        const categoryInfo = category as CategoryI;
+
+        return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id , categoryName: categoryInfo.categoryName}
+    })
+
+    return formattedProducts;
+}
 
 
 
-      // Realizar la agregación para agrupar los productos por comercio
-        // const products = await Product.aggregate([
-        //     {
-        //         $group: {
-        //             _id: "$shop",
-        //             productos: { $push: "$$ROOT" }
-        //         },
-        //     }
-        // ]);
 
-// {
-//     $lookup: {
-//         from: "shops", // Nombre de la colección de comercios
-//         localField: "_id",
-//         foreignField: "_id",
-//         as: "comercio"
-//     }
-// },
-// {
-//     $unwind: "$comercio"
-// },
-// {
-//     $project: {
-//         _id: 0, // Excluir el campo _id de los resultados
-//         comercio: "$comercio.username", // Mostrar el campo "nombre" del comercio
-//         productos: 1 // Mantener el campo "productos" en los resultados
-//     }
-// }
+

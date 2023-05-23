@@ -1,6 +1,7 @@
 import { Schema, SchemaDefinitionProperty, model } from "mongoose";
 
 export interface ProductI{
+    _id?: string,
     title:string,
     description: string,
     imgUrl: string,
