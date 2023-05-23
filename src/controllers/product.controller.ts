@@ -4,6 +4,7 @@ import Shop, { ShopI } from "../models/Shop";
 import { isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
+import Category, { CategoryI } from "../models/Category";
 
 
 
@@ -11,7 +12,7 @@ export const createProduct = async (req: Request,res: Response) => {
     try {
 
         
-        const {shop} = req.body;
+        const {shop, category} = req.body;
 
         const file:any = req.file;
 
@@ -20,6 +21,11 @@ export const createProduct = async (req: Request,res: Response) => {
         //Verficar el id de la tienda
         const isShop = await Shop.findById(shop);
         if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
+
+        //Verificar el id de la categoria
+        if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
+        const isCategory = await Category.findById(category);
+        if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
 
 
         if(!req.file?.path) return  res.status(404).json({message: "Imagen no encontrada"});
@@ -165,14 +171,15 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
     try {
 
 
-        const products = await Product.find({}).populate("shop");
+        const products = await Product.find({}).populate("shop").populate("category");
 
         const formateddProducts = products.map((product) => {
-            const {_id, title, price, description, stock, shop, imgUrl} = product;
+            const {_id, title, price, description, stock, shop, imgUrl, category} = product;
 
             const shopInfo:any = shop
+            const categoryInfo = category as CategoryI;
             
-            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
+            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id, categoryName: categoryInfo.categoryName }
         })
 
         

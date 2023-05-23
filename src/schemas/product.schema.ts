@@ -23,9 +23,9 @@ export const createProductSchema = z.object({
         // image: z.string().refine((value:any) => !!value, {
         //     message: "Se debe proporcionar un archivo",}),
 
-        shop: z.string({required_error:"EL id de la tienda es obligatorio", invalid_type_error:"El id debe ser un string"}).nonempty("EL id de la tienda es obligatorio")
+        shop: z.string({required_error:"EL id de la tienda es obligatorio", invalid_type_error:"El id debe ser un string"}).nonempty("EL id de la tienda es obligatorio"),
         
-
+        category: z.string({required_error:"EL id de la categoría es obligatorio", invalid_type_error:"El id debe ser un string"}).nonempty("EL id de la categoría es obligatorio")
     })
 });
 

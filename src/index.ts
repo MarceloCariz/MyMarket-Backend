@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import shopRoutes from './routes/shop.routes';
 import productRoutes from './routes/product.routes'
+import categoryRoutes from './routes/category.routes';
 import dbConnection from './database/config';
 
 
@@ -29,6 +30,7 @@ app.use('/api/auth/', authRoutes);
 app.use('/api/user/', userRoutes);
 app.use('/api/shop/', shopRoutes);
 app.use('/api/product/', productRoutes);
+app.use('/api/category/', categoryRoutes);
 
 
 
