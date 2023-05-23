@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Product, { ProductI } from "../models/Product";
 import Shop, { ShopI } from "../models/Shop";
-import { isObjectIdOrHexString } from "mongoose";
+import { SchemaDefinitionProperty, isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
 
@@ -170,7 +170,7 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
         const formateddProducts = products.map((product) => {
             const {_id, title, price, description, stock, shop, imgUrl} = product;
 
-            const shopInfo:any = shop
+            const shopInfo = shop as ShopI;
             
             return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
         })
@@ -198,7 +198,7 @@ export const searchProduct = async(req:Request, res:Response) => {
         const formateddProducts = products.map((product) => {
             const {_id, title, price, description, stock, shop, imgUrl} = product;
 
-            const shopInfo:any = shop
+            const shopInfo = shop as ShopI;
             
             return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
         })
