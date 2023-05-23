@@ -192,9 +192,19 @@ export const searchProduct = async(req:Request, res:Response) => {
                 
         const regex = new RegExp(searchValue, 'i');
 
-        const products = await Product.find({'title': {$regex: regex}});
+        const products = await Product.find({'title': {$regex: regex}}).populate("shop");
 
-        res.status(200).json(products);
+        
+        const formateddProducts = products.map((product) => {
+            const {_id, title, price, description, stock, shop, imgUrl} = product;
+
+            const shopInfo:any = shop
+            
+            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
+        })
+
+    
+        res.status(200).json(formateddProducts);
 
     } catch (error) {
         console.log(error)
