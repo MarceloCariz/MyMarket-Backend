@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { RolesEnum } from "../enums/user.enum";
-import { UserI } from "../models/User";
 
 export interface AuthenticatedRequest extends Request {
     uid?: string;

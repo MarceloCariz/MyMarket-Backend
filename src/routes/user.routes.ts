@@ -24,9 +24,7 @@ router.get('/profile/', [authenticateJWT, authorizeRole(RolesEnum.USER)], getPro
 
 router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
 
-router.get('/', (req, res) => {
 
-});
 
 
 export default router;

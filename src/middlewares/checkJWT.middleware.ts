@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
-import { UserI } from '../models/User';
 import { RolesEnum } from '../enums/user.enum';
 
 

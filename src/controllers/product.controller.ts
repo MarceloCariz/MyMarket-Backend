@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import {  Request, Response } from "express";
 import Product, { ProductI } from "../models/Product";
 import Shop, { ShopI } from "../models/Shop";
-import { Error, SchemaDefinitionProperty, isObjectIdOrHexString } from "mongoose";
+import { isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
 import Category, { CategoryI } from "../models/Category";
@@ -71,7 +71,6 @@ export const createProduct = async (req: Request,res: Response) => {
 export const updateProduct = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const productId = req.params.productId;
-        // const {title, description, price, stock} = req.body;
 
         // Validar si 
         const product = await Product.findById(productId);

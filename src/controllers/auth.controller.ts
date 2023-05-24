@@ -36,9 +36,6 @@ export const login = async(req: Request, res: Response) => {
         const token = await generateJWT({uid: user.id, username: user.username, roles: user.roles});
 
         res.json({
-            // uid: user.id,
-            // username: user.username,
-            // roles: user.roles,
             token
         })
 
