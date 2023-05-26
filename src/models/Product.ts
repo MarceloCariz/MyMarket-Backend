@@ -10,6 +10,7 @@ export interface ProductI{
     shop: SchemaDefinitionProperty<string>,
     publicId: string,
     category: SchemaDefinitionProperty<string>,
+    categoryName?: string,
 }
 
 

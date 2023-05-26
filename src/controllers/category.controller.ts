@@ -26,3 +26,13 @@ export const createCategory = async(req: Request, res: Response) => {
         console.log(error)
     }
 }
+
+export const getAllCategories = async( req:Request, res:Response) => {
+    try {
+        const categories = await Category.find({});
+
+        res.json(categories);
+    } catch (error) {
+        console.log(error)
+    }
+}

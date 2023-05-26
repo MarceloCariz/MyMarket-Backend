@@ -14,7 +14,7 @@ export const createProduct = async (req: Request,res: Response) => {
         
         const {shop, category} = req.body;
 
-        const file:any = req.file;
+        const file = req.file;
 
         if(!file) return res.status(404).json({message: "Imagen no encontrada"});
 
@@ -61,7 +61,11 @@ export const createProduct = async (req: Request,res: Response) => {
                 {$push: {products: product._id}},
                 {new: true}
         )
-        res.status(201).json(product)
+        const {categoryName} = isCategory;
+
+        const productResponse = { ...product.toObject(), categoryName};
+
+        res.status(201).json(productResponse);
     } catch (error) {
         console.log(error)
         res.status(500).json({message:"Interal server error"})
@@ -71,11 +75,15 @@ export const createProduct = async (req: Request,res: Response) => {
 export const updateProduct = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const productId = req.params.productId;
+        const {category} = req.body;
 
         // Validar si 
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
 
+        if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
+        const isCategory = await Category.findById(category);
+        if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
 
         const file:any = req.file; // imagen
 
@@ -96,9 +104,12 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
             await product.save();
         }
 
-        const productUpdated = await Product.findByIdAndUpdate(productId, {...req.body}, {new: true});
+        const productUpdated= await Product.findByIdAndUpdate(productId, {...req.body}, {new: true});
+        const {categoryName} = isCategory;
 
-        res.status(201).json(productUpdated)
+        const productResponse = { ...productUpdated?.toObject(), categoryName};
+
+        res.status(201).json(productResponse)    
     } catch (error) {
         console.log(error)
     }
@@ -202,14 +213,14 @@ export const searchProduct = async(req:Request, res:Response) => {
 
 const productResponseFormat = (products: ProductI[]) => {
     const formattedProducts = products.map((product:ProductI) => {
-        const {_id, title, price, description, stock, shop, imgUrl, category} = product;
+        const {_id, title, price, description, stock, shop, imgUrl, category:categoryInfo} = product;
 
-        const shopInfo = shop as ShopI;
-        const categoryInfo = category as CategoryI;
+        const {shopName, _id:shopId} = shop as ShopI;
+        const {categoryName, _id:category} = categoryInfo as CategoryI;
 
-        return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id , categoryName: categoryInfo.categoryName}
+        return {_id, title, price, description, imgUrl,  stock, shopName, shopId , 
+            categoryName, category}
     })
-
     return formattedProducts;
 }
 
