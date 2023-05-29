@@ -2,8 +2,6 @@ import {Request, Response} from 'express'
 import Category, { CategoryI } from "../models/Category";
 
 
-
-
 export const createCategory = async(req: Request, res: Response) => {
     try {
         const {categoryName}:CategoryI = req.body;

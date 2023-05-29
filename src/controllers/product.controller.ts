@@ -18,11 +18,11 @@ export const createProduct = async (req: Request,res: Response) => {
 
         if(!file) return res.status(404).json({message: "Imagen no encontrada"});
 
-        //Verficar el id de la tienda
+        //Verficar el id de la tienda --- pasar a middleware
         const isShop = await Shop.findById(shop);
         if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
 
-        //Verificar el id de la categoria
+        //Verificar el id de la categoria --- pasar a middleware
         if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
         const isCategory = await Category.findById(category);
         if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
@@ -41,8 +41,6 @@ export const createProduct = async (req: Request,res: Response) => {
 
         // Rescatar url y id de la imagen
         const {secure_url, public_id} = cloudinaryResponse;
-
-
 
         ///Producto con todos sus atributos
         const newProduct:ProductI = {
@@ -77,15 +75,16 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
         const productId = req.params.productId;
         const {category} = req.body;
 
-        // Validar si 
+        // TODO: pasar a middleware
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
 
+        // TODO: pasar a middleware
         if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
         const isCategory = await Category.findById(category);
         if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
 
-        const file:any = req.file; // imagen
+        const file = req.file; // imagen
 
         if(file && file.path){
             //eliminar image anterior
@@ -120,7 +119,7 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
         const userId:any =  req.uid;
         const productId = req.params.productId;
         
-        //Verificar si la tienda existe por ende el producto 
+        //Verificar si la tienda existe por ende el producto  --- pasar a middleware
         const isOwnerProduct = await Shop.findById(userId);
         if(!isOwnerProduct) return res.status(404).json({message: "Producto no encontrado"});
 
@@ -153,7 +152,7 @@ export const getProductByShop = async(  req: Request, res: Response) => {
 
         if(!isObjectIdOrHexString(shopId)) return res.status(404).json({message:"Id del comercio incorrecto"});
 
-        //Buscar el comercio por el id
+        //Buscar el comercio por el id --- pasar a middleware
         const shop = await Shop.findById(shopId);
         if(!shop) return res.status(404).json({message:"El comercio no existe"});
 
@@ -175,9 +174,7 @@ export const getProductByShop = async(  req: Request, res: Response) => {
 export const getAllProductsByShop = async (req: Request, res: Response) => {
     try {
 
-
         const products = await Product.find({}).populate("shop").populate("category");
-
 
         const formateddProducts = productResponseFormat(products);
     
@@ -223,6 +220,7 @@ const productResponseFormat = (products: ProductI[]) => {
     })
     return formattedProducts;
 }
+
 
 
 

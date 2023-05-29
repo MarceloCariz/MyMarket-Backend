@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getProfile, updateProfile, updateUser } from '../controllers/user.controller';
+import { createUser, getProfile, getUsers, updateProfile, updateUser } from '../controllers/user.controller';
 import { schemaValidation } from '../middlewares/schemaValidator.middleware';
 import { createUserSchema, updateProfileUserSchema, updateUserSchema } from '../schemas/user.schema';
 import authenticateJWT from '../middlewares/checkJWT.middleware';
@@ -20,9 +20,12 @@ router.put('/update/profile/',
     [authenticateJWT, authorizeRole(RolesEnum.USER), schemaValidation(updateProfileUserSchema), upload.single("imgProfile")], 
         updateProfile);
 
+router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
+
 router.get('/profile/', [authenticateJWT, authorizeRole(RolesEnum.USER)], getProfile);
 
-router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
+router.get('/', getUsers);
+
 
 
 
