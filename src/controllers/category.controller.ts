@@ -4,8 +4,6 @@ import { HTTP_RESPONSE } from '../enums/httpErrors.enum';
 import { isObjectIdOrHexString } from 'mongoose';
 
 
-
-
 export const createCategory = async(req: Request, res: Response) => {
     try {
         const {categoryName}:CategoryI = req.body;

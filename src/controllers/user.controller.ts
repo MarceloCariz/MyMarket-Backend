@@ -7,6 +7,7 @@ import { JWTRequestI } from "../middlewares/checkJWT.middleware";
 import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 
+
 export const createUser = async (req:Request, res:Response) => {
     try {
         // Buscar usuario
@@ -108,6 +109,15 @@ export const updateUser = (req:Request, res:Response) => {
         res.send("correcto")
     } catch (error) {
         res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
+    }
+}
+
+export const getUsers = async(req: Request, res:Response) => {
+    try {
+        const users = await User.find({}).select('-password');
+        res.status(200).json(users)
+    } catch (error) {
+        res.status(500).json({message: "Internal server Error"});
     }
 }
 
