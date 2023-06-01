@@ -4,6 +4,7 @@ import User from "../models/User";
 import Shop from "../models/Shop";
 import Profile from "../models/Profile";
 import { JWTRequestI } from "../middlewares/checkJWT.middleware";
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 
 export const createUser = async (req:Request, res:Response) => {
@@ -13,8 +14,8 @@ export const createUser = async (req:Request, res:Response) => {
         const isShop = await Shop.findOne({email: req.body.email});
 
         //mandar mensaje si se encuentra
-        if(isUser) return res.status(400).json({message:"El usuario ya existe"});
-        if(isShop) return res.status(400).json({message:"El usuario ya existe"});
+        if(isUser) return res.status(HTTP_RESPONSE.BadRequest).json({message:"El usuario ya existe"});
+        if(isShop) return res.status(HTTP_RESPONSE.BadRequest).json({message:"El usuario ya existe"});
 
 
         //Crear el perfil
@@ -35,11 +36,11 @@ export const createUser = async (req:Request, res:Response) => {
         await user.save();
 
         //Enviar el usuario guardado desde la db
-        res.status(201).json(user);
+        res.status(HTTP_RESPONSE.Created).json(user);
 
     } catch (error) {
         console.log(error)
-        res.status(500).json({message: "Internal server Error"});
+        res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
     }
 }
 
@@ -50,7 +51,7 @@ export const updateProfile = async(req: JWTRequestI, res:Response) => {
 
         //Verficar usuario
         const user = await User.findById(uid).populate("profile");
-        if(!user) return res.status(404).json({message:"Usuario no encontrado"});
+        if(!user) return res.status(HTTP_RESPONSE.NotFound).json({message:"Usuario no encontrado"});
 
         const imagen = req.file;
 
@@ -63,11 +64,11 @@ export const updateProfile = async(req: JWTRequestI, res:Response) => {
 
         
 
-        res.status(201).json(profile)
+        res.status(HTTP_RESPONSE.Created).json(profile)
 
     } catch (error) {
         console.log(error)
-        res.status(500).json({message: "Internal server Error"});
+        res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
     }
 }
 
@@ -76,16 +77,16 @@ export const getProfile  = async(req: JWTRequestI, res: Response) => {
         const {uid} = req;
 
         const user = await User.findById(uid).populate("profile");
-        if(!user) return res.status(404).json({message:"Usuario no encontrado"});
+        if(!user) return res.status(HTTP_RESPONSE.NotFound).json({message:"Usuario no encontrado"});
 
 
         const profile = await Profile.findById(user.profile);
 
-        res.status(200).json(profile)
+        res.status(HTTP_RESPONSE.OK).json(profile)
 
     } catch (error) {
         console.log(error)
-        res.status(500).json({message: "Internal server Error"});
+        res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
     }
 }
 
@@ -94,7 +95,7 @@ export const updateUser = (req:Request, res:Response) => {
     try {
         res.send("correcto")
     } catch (error) {
-        res.status(500).json({message: "Internal server Error"});
+        res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
     }
 }
 

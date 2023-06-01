@@ -1,5 +1,6 @@
 import {Request, Response} from 'express'
 import Category, { CategoryI } from "../models/Category";
+import { HTTP_RESPONSE } from '../enums/httpErrors.enum';
 
 
 
@@ -20,10 +21,11 @@ export const createCategory = async(req: Request, res: Response) => {
         const category = await Category.create({categoryName: lowerCategoryName});
         await category.save();
 
-        res.status(201).json(category);
+        res.status(HTTP_RESPONSE.Created).json(category);
 
     } catch (error) {
         console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Internal server error"})
     }
 }
 
@@ -34,5 +36,6 @@ export const getAllCategories = async( req:Request, res:Response) => {
         res.json(categories);
     } catch (error) {
         console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Internal server error"})
     }
 }

@@ -5,6 +5,7 @@ import { isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
 import Category, { CategoryI } from "../models/Category";
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 
 
@@ -16,19 +17,19 @@ export const createProduct = async (req: Request,res: Response) => {
 
         const file = req.file;
 
-        if(!file) return res.status(404).json({message: "Imagen no encontrada"});
+        if(!file) return res.status(HTTP_RESPONSE.NotFound).json({message: "Imagen no encontrada"});
 
         //Verficar el id de la tienda
         const isShop = await Shop.findById(shop);
-        if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
+        if(!isShop) return res.status(HTTP_RESPONSE.NotFound).json({message:`Comercio con el id: ${shop} no encontrado`});
 
         //Verificar el id de la categoria
         if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
         const isCategory = await Category.findById(category);
-        if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
+        if(!isCategory) return res.status(HTTP_RESPONSE.NotFound).json({message:`Categoria con el id: ${category} no encontrado`});
 
 
-        if(!req.file?.path) return  res.status(404).json({message: "Imagen no encontrada"});
+        if(!req.file?.path) return  res.status(HTTP_RESPONSE.NotFound).json({message: "Imagen no encontrada"});
         
         //Subir imagen cloudinary
         const cloudinaryResponse = await cloudinary.uploader.upload(req.file?.path, {
@@ -65,10 +66,10 @@ export const createProduct = async (req: Request,res: Response) => {
 
         const productResponse = { ...product.toObject(), categoryName};
 
-        res.status(201).json(productResponse);
+        res.status(HTTP_RESPONSE.Created).json(productResponse);
     } catch (error) {
         console.log(error)
-        res.status(500).json({message:"Interal server error"})
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Interal server error"})
     }
 }
 
@@ -81,6 +82,7 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
 
+        // Encontrar categoria
         if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
         const isCategory = await Category.findById(category);
         if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
@@ -109,9 +111,10 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
 
         const productResponse = { ...productUpdated?.toObject(), categoryName};
 
-        res.status(201).json(productResponse)    
+        res.status(HTTP_RESPONSE.Created).json(productResponse)    
     } catch (error) {
         console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Interal server error"})
     }
 }
 
@@ -122,7 +125,7 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
         
         //Verificar si la tienda existe por ende el producto 
         const isOwnerProduct = await Shop.findById(userId);
-        if(!isOwnerProduct) return res.status(404).json({message: "Producto no encontrado"});
+        if(!isOwnerProduct) return res.status(HTTP_RESPONSE.NotFound).json({message: "Producto no encontrado"});
 
         //Verificar si el producto a elminar pertenece a la tienda
         const isProduct = isOwnerProduct?.products.find((p:any) => p._id.toString() === productId && p);
@@ -155,7 +158,7 @@ export const getProductByShop = async(  req: Request, res: Response) => {
 
         //Buscar el comercio por el id
         const shop = await Shop.findById(shopId);
-        if(!shop) return res.status(404).json({message:"El comercio no existe"});
+        if(!shop) return res.status(HTTP_RESPONSE.NotFound).json({message:"El comercio no existe"});
 
         const products = await Product.find({'shop': shopId}).populate("shop").populate("category");
 
@@ -163,7 +166,7 @@ export const getProductByShop = async(  req: Request, res: Response) => {
 
 
 
-        res.status(200).json(formateddProducts);
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
 
     } catch (error) {
         console.log(error)
@@ -181,10 +184,10 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
 
         const formateddProducts = productResponseFormat(products);
     
-        res.status(200).json(formateddProducts);
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Interal server error" });
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Interal server error" });
     }
 };
 
@@ -192,7 +195,7 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
 export const searchProduct = async(req:Request, res:Response) => {
     try {
         const query = req.query.q;
-        if(!query) return res.status(404).json({message: "No se proporciono parametro de busqueda"});
+        if(!query) return res.status(HTTP_RESPONSE.NotFound).json({message: "No se proporciono parametro de busqueda"});
         const searchValue = query.toString();
                 
         const regex = new RegExp(searchValue, 'i');
@@ -203,10 +206,11 @@ export const searchProduct = async(req:Request, res:Response) => {
         const formateddProducts = productResponseFormat(products);
 
     
-        res.status(200).json(formateddProducts);
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
 
     } catch (error) {
         console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Interal server error" });
     }
 }
 

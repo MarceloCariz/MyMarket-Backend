@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {AnyZodObject, ZodError} from 'zod'
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 export const schemaValidation = 
 (schema: AnyZodObject) =>
@@ -14,9 +15,9 @@ export const schemaValidation =
     } catch (error) {
         if(error instanceof ZodError){
             return res
-                .status(400)
+                .status(HTTP_RESPONSE.BadRequest)
                 .json(error.issues.map((issue) => ({field: issue.path, message: issue.message})));
         }
-        return res.status(500).json({message: "Internal server Error"});
+        return res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
     }
 }
