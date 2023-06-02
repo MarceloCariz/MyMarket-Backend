@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 const api = supertest(app);
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2NDZiN2UyMDljZjU1ZmI4NDliYWJjZTciLCJ1c2VybmFtZSI6Ik1hcmNlbG8iLCJyb2xlcyI6WyJ1c2VyIl0sImlhdCI6MTY4NTM3NDM3NCwiZXhwIjoxNjg1Mzg4Nzc0fQ.eff8O8Kfaky-WWGa8cLddOE6cZeFOdeWnKKxN-mMI-4"
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2NDc2MDdlMmMwYWVjZTY1MjgyYjU1ZTAiLCJ1c2VybmFtZSI6IlRlc3RVc2VyIiwicm9sZXMiOlsidXNlciJdLCJpYXQiOjE2ODU3MTUxMjUsImV4cCI6MTY4NTcyOTUyNX0.JxV5JbOoAHieaVyyax1Dm4wK6-Y2-ycl1K4lBqzaOjo"
 
 describe("Users Tests", () => {
 
