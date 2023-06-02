@@ -14,7 +14,7 @@ const findShop = async (req:Request, res:Response, next:NextFunction) => {
         } catch (error) {
         // Manejo del error
         console.error(error);
-        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Error del servidor" });
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Error del servidor", error });
         }
 };
 

@@ -12,7 +12,7 @@ const findUser = async (req:Request, res:Response, next:NextFunction) => {
     next();
     } catch (error) {
         console.error(error);
-        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Error del servidor" });
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Error del servidor" , error});
     }
 };
 
