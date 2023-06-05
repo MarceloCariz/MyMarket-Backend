@@ -6,6 +6,7 @@ import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
 import Category, { CategoryI } from "../models/Category";
 import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
+import { JWTRequestI } from "../middlewares/checkJWT.middleware";
 
 
 
@@ -211,6 +212,33 @@ export const searchProduct = async(req:Request, res:Response) => {
     } catch (error) {
         console.log(error)
         res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Interal server error" });
+    }
+}
+
+
+export const getCart = async(req:JWTRequestI, res:Response) => {
+    try {
+        const cookiesCart = req.cookies[`cart-${req.uid}`]
+        const cartIds = JSON.parse(cookiesCart).map((cart:{_id:string}) => (cart._id));
+        const cartArray:ProductI[] = [];
+        for (const idProduct of cartIds) {
+            const product = await Product.findById(idProduct);
+            const productInfo = JSON.parse(cookiesCart).find((p:ProductI) => (p._id === idProduct));
+
+            const newProduct = {
+                ...productInfo,
+                price: product?.price,
+                stock: product?.stock,
+                title: product?.title,
+                imgUrl: product?.imgUrl
+            }
+            cartArray.push(newProduct);
+        }
+
+        res.send(cartArray);
+        
+    } catch (error) {
+        console.log(error);
     }
 }
 

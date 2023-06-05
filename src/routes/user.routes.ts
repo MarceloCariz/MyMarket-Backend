@@ -5,7 +5,9 @@ import { createUserSchema, updateProfileUserSchema, updateUserSchema } from '../
 import authenticateJWT from '../middlewares/checkJWT.middleware';
 import authorizeRole from '../middlewares/authorizeByRole.middleware';
 import { RolesEnum } from '../enums/user.enum';
+import {JWTRequestI} from '../middlewares/checkJWT.middleware'
 import multer from 'multer';
+import { getCart } from '../controllers/product.controller';
 
 
 const storage = multer.diskStorage({});
@@ -24,7 +26,19 @@ router.get('/profile/', [authenticateJWT, authorizeRole(RolesEnum.USER)], getPro
 
 router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
 
+router.post('/setcart', (req, res) => {
+    const cart = req.body.cart;
+    const  uid = req.body.uid;
 
+    res.cookie(`cart-${uid}`, cart,{
+        maxAge: 86400000, // 1 day
+        httpOnly: false,
+        path: '/'
+    })
+    res.send("Cookie")
+})
+
+router.get('/getcart', authenticateJWT,getCart)
 
 
 export default router;

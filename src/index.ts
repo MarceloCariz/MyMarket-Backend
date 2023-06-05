@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import * as dotenv from "dotenv";
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import shopRoutes from './routes/shop.routes';
@@ -16,9 +17,11 @@ import dbConnection from './database/config';
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://localhost:5173' }))
 app.use(express.static(path.join(__dirname, "public")));//directorio publico archivos e imagenes
 app.use(express.urlencoded({extended: false}))
+//Cookie
+app.use(cookieParser());
 
 
 //Base de datos
