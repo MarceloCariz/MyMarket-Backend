@@ -11,7 +11,7 @@ import categoryRoutes from './routes/category.routes';
 import dbConnection from './database/config';
 
 
-const allowedOrigins = ['http://localhost:5173', 'https://mymarketm.netlify.app/']
+const allowedOrigins = ['http://localhost:5173', 'https://mymarketm.netlify.app']
 
 //Configuraciones
 const app = express();
