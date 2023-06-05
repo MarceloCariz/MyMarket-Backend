@@ -31,9 +31,15 @@ router.post('/setcart', (req, res) => {
     const  uid = req.body.uid;
 
     res.cookie(`cart-${uid}`, cart,{
-        maxAge: 86400000, // 1 day
-        httpOnly: false,
-        path: '/'
+        // maxAge: 86400000, // 1 day
+        // httpOnly: true,
+        // path: '/',
+        maxAge: 86400000, 
+        httpOnly: true, 
+        secure: true, 
+        sameSite: 'lax', 
+        domain: '.mymarketm.netlify.app', 
+        path: '/',
     })
     res.send("Cookie")
 })
