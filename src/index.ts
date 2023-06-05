@@ -11,13 +11,13 @@ import categoryRoutes from './routes/category.routes';
 import dbConnection from './database/config';
 
 
-
+const allowedOrigins = ['http://localhost:5173', 'https://mymarketm.netlify.app/']
 
 //Configuraciones
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors({ credentials: true, origin: 'http://localhost:5173' }))
+app.use(cors({ credentials: true, origin: allowedOrigins }))
 app.use(express.static(path.join(__dirname, "public")));//directorio publico archivos e imagenes
 app.use(express.urlencoded({extended: false}))
 //Cookie
