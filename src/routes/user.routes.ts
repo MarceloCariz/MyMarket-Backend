@@ -29,7 +29,6 @@ router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
 router.post('/setcart', (req, res) => {
     const cart = req.body.cart;
     const  uid = req.body.uid;
-
     res.cookie(`cart-${uid}`, cart,{
         // maxAge: 86400000, // 1 day
         // httpOnly: false,
@@ -42,6 +41,8 @@ router.post('/setcart', (req, res) => {
     })
     res.send("Cookie")
 })
+
+
 
 router.get('/getcart', authenticateJWT,getCart)
 

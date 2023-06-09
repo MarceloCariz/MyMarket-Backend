@@ -219,8 +219,8 @@ export const searchProduct = async(req:Request, res:Response) => {
 export const getCart = async(req:JWTRequestI, res:Response) => {
     try {
         const cookiesCart = req.cookies[`cart-${req.uid}`]
-        const cartIds = JSON.parse(cookiesCart).map((cart:{_id:string}) => (cart._id));
         const cartArray:ProductI[] = [];
+        const cartIds = cookiesCart ? JSON.parse(cookiesCart).map((cart:{_id:string}) => (cart._id)) : [];
         for (const idProduct of cartIds) {
             const product = await Product.findById(idProduct);
             const productInfo = JSON.parse(cookiesCart).find((p:ProductI) => (p._id === idProduct));
