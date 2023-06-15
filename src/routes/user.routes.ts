@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getProfile, updateProfile, updateUser } from '../controllers/user.controller';
+import { createUser, deleteUser, getProfile, updateProfile, updateUser } from '../controllers/user.controller';
 import { schemaValidation } from '../middlewares/schemaValidator.middleware';
 import { createUserSchema, updateProfileUserSchema, updateUserSchema } from '../schemas/user.schema';
 import authenticateJWT from '../middlewares/checkJWT.middleware';
@@ -18,13 +18,16 @@ const router = express.Router();
 
 router.post('/create', schemaValidation(createUserSchema) , createUser);
 
+
+router.delete("/delete/:id", [authenticateJWT, authorizeRole(RolesEnum.ADMIN)], deleteUser);
+
 router.put('/update/profile/', 
     [authenticateJWT, authorizeRole(RolesEnum.USER), schemaValidation(updateProfileUserSchema), upload.single("imgProfile")], 
         updateProfile);
 
 router.get('/profile/', [authenticateJWT, authorizeRole(RolesEnum.USER)], getProfile);
 
-router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
+// router.put('/update/:id', schemaValidation(updateUserSchema), updateUser );
 
 router.post('/setcart', (req, res) => {
     const cart = req.body.cart;
@@ -41,7 +44,6 @@ router.post('/setcart', (req, res) => {
     })
     res.send("Cookie")
 })
-
 
 
 router.get('/getcart', authenticateJWT,getCart)

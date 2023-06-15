@@ -90,6 +90,18 @@ export const getProfile  = async(req: JWTRequestI, res: Response) => {
     }
 }
 
+export const deleteUser = async(req:Request, res:Response) => {
+    try {
+        const uid = req.params.id;
+        const user = await User.findById(uid);
+        if(!user) return res.status(HTTP_RESPONSE.NotFound).json({message:"Usuario no encontrado"});
+
+        await user.deleteOne();
+        res.status(HTTP_RESPONSE.Created).json("deleted")
+    } catch (error) {
+        res.status(HTTP_RESPONSE.InternalServerError).json({message: "Internal server Error"});
+    }
+} 
 
 export const updateUser = (req:Request, res:Response) => {
     try {
