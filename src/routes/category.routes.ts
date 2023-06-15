@@ -16,3 +16,47 @@ router.put('/update/:id',[authenticateJWT, authorizeRole(RolesEnum.ADMIN), schem
 router.get('/',getAllCategories);
 
 export default router;
+
+
+// _id?: string;
+// categoryName: string;
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Category:
+ *      type: object
+ *      properties:
+ *          _id:
+ *            type: string
+ *            description: Id category
+ *          categoryName:
+ *            type: string
+ *            description: Category name
+ *      required:
+ *        - categoryName
+ *      example:
+ *        categoryName: "testCategory"
+ *             
+ */
+
+
+/**
+ * @swagger
+ *   /category/create:
+ *   post:
+ *     tags: [Category]
+ *     summary: Create a category
+ *     description: Create a category
+ *     requestBody:
+ *          required: true
+ *          content:
+ *            application/json:
+ *              schema:
+ *               type: object
+ *               $ref: '#components/schemas/Category'
+ *     responses:
+ *       201:
+ *         description: return token.
+ */
