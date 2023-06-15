@@ -1,13 +1,36 @@
 version: '3'
 
 services:
+  frontend:
+    container_name: mymarket-frontend
+    image: mymarket-frontend
+    ports:
+      - 5173:5173
+  backend:
+    container_name: mymarket-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 4000:4000
+    environment:
+      - DB_URI=mongodb://app-mern-db:27017/mymarket
+    networks:
+      - mymarket-network
   db:
     image: mongo:5
     container_name: app-mern-db
     restart: always
     ports:
       - 27017:27017
+    networks:
+      - mymarket-network
     environment:
       MONGODB_DATABASE: app
     volumes:
       - ./mongo_data:/data/db
+
+
+networks:
+  mymarket-network:
+    driver: bridge

@@ -18,9 +18,6 @@ router.get('/',getAllCategories);
 export default router;
 
 
-// _id?: string;
-// categoryName: string;
-
 /**
  * @swagger
  * components:
@@ -58,5 +55,64 @@ export default router;
  *               $ref: '#components/schemas/Category'
  *     responses:
  *       201:
- *         description: return token.
+ *         description: return the new category.
+ */
+
+/**
+ * @swagger
+ *   /category/:
+ *   get:
+ *     tags: [Category]
+ *     summary: Get all categories
+ *     description: Get all categories
+ *     responses:
+ *       200:
+ *         description: return the all categories.
+ */
+
+
+/**
+ * @swagger
+ *   /category/update/{id}:
+ *   put:
+ *     tags: [Category]
+ *     summary: update a category by id
+ *     description: update a category by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: Category ID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *          required: true
+ *          content:
+ *            application/json:
+ *              schema:
+ *               type: object
+ *               $ref: '#components/schemas/Category'
+ *     responses:
+ *       200:
+ *         description: return the all categories.
+ */
+
+
+/**
+ * @swagger
+ *   /category/delete{id}:
+ *   delete:
+ *     tags: [Category]
+ *     summary: Delete a category by id
+ *     description: Delete a category by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: Category ID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: return the all categories.
  */
