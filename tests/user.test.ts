@@ -1,12 +1,26 @@
 import supertest from 'supertest';
 import {app, server} from '../src/index'
 import { expect } from 'chai';
+import { before } from 'mocha';
 
 const api = supertest(app);
 
-const userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2NDc2MDdlMmMwYWVjZTY1MjgyYjU1ZTAiLCJ1c2VybmFtZSI6IlRlc3RVc2VyIiwicm9sZXMiOlsidXNlciJdLCJpYXQiOjE2ODY3OTM4NzksImV4cCI6MTY4NjgwODI3OX0.BSUZStNTnW5cCVvkIWlLceEBxoIfWAnb8e4bLdKcc40"
-describe("Users Tests", () => {
+const user = {
+    email:"test@correo.com",
+    password: "12345678"
+}
 
+
+let userToken = "";
+
+
+before(async() => {
+    const token = await api.post("/api/auth/login").send(user);
+    userToken = token.body.token;  
+});
+
+describe("Users Tests", () => {
+    
     it('users are returned as json', done => {
         api.get("/api/user")
         .set("Accept", "application/json")
