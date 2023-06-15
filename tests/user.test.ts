@@ -47,6 +47,10 @@ describe("Users Tests", () => {
         })
     })
 
+    it("DELETE - test user" , done => {
+        api.delete("/api/user/")
+    })
+
     it("Profile - respond with json containing a single profile", done => {
         api.get("/api/user/profile/")
         .set("Authorization", `Bearer ${userToken}`)
