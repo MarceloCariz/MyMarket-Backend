@@ -7,7 +7,8 @@
     "dev": "nodemon src/index.ts",
     "start": "node build/index.js",
     "tsc": "tsc",
-    "test": "SET NODE_ENV=test && mocha --check-leaks -r tsconfig-paths/register -r ts-node/register \"tests/**/*.test.ts\""
+    "test": "nyc mocha --require ts-node/register tests/**/*.test.ts",
+    "coverage": "nyc report --reporter=html && start coverage/index.html"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,9 @@
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.1",
     "chai": "^4.3.7",
+    "istanbul": "^0.4.5",
     "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.8.8",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.1",

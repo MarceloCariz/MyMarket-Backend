@@ -4,8 +4,7 @@ import { expect } from 'chai';
 
 const api = supertest(app);
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2NDc2MDdlMmMwYWVjZTY1MjgyYjU1ZTAiLCJ1c2VybmFtZSI6IlRlc3RVc2VyIiwicm9sZXMiOlsidXNlciJdLCJpYXQiOjE2ODU3MTUxMjUsImV4cCI6MTY4NTcyOTUyNX0.JxV5JbOoAHieaVyyax1Dm4wK6-Y2-ycl1K4lBqzaOjo"
-
+const userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2NDc2MDdlMmMwYWVjZTY1MjgyYjU1ZTAiLCJ1c2VybmFtZSI6IlRlc3RVc2VyIiwicm9sZXMiOlsidXNlciJdLCJpYXQiOjE2ODY3OTM4NzksImV4cCI6MTY4NjgwODI3OX0.BSUZStNTnW5cCVvkIWlLceEBxoIfWAnb8e4bLdKcc40"
 describe("Users Tests", () => {
 
     it('users are returned as json', done => {
@@ -36,7 +35,7 @@ describe("Users Tests", () => {
 
     it("Profile - respond with json containing a single profile", done => {
         api.get("/api/user/profile/")
-        .set("Authorization", `Bearer ${token}`)
+        .set("Authorization", `Bearer ${userToken}`)
         .expect("Content-Type",/json/)
         .expect(200)
         .end(err => {
@@ -47,7 +46,7 @@ describe("Users Tests", () => {
 
     it("Profile - respond with code 403 forbidden, invalid token", done => {
         api.get("/api/user/profile/")
-        .set("Authorization", `Bearer ${token}badtoken`)
+        .set("Authorization", `Bearer ${userToken}badtoken`)
         .end((err, res) => {
             expect(res.status).to.equal(403);
             expect(res.body).to.deep.equal({
