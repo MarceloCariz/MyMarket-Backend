@@ -10,13 +10,22 @@ const user = {
     password: "12345678"
 }
 
+const admin = {
+    email:"admin@correo.com",
+    password: "12345678"
+}
+
 
 let userToken = "";
+let idUser = "";
+let adminToken = "";
 
 
 before(async() => {
     const token = await api.post("/api/auth/login").send(user);
     userToken = token.body.token;  
+    const tokenAdmin = await api.post("/api/auth/login").send(admin);
+    adminToken = tokenAdmin.body.token;  
 });
 
 describe("Users Tests", () => {
@@ -28,7 +37,7 @@ describe("Users Tests", () => {
         .expect(200, done);
     });
 
-    it("POST - new user" , done => {
+    it("POST - new user" , (done) => {
         const userData = {
             email: "testTDDUser@correo.com",
             username: "TestUser",
@@ -37,18 +46,72 @@ describe("Users Tests", () => {
         }
 
         api.post('/api/user/create')
-        .send(userData)
-        .set("Accept", "application/json")
-        .expect("Content-Type", /json/)
-        .expect(201)
-        .end(err => {
-            err && done(err);
-            done();
-        })
+            .send(userData)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(201)
+            .end((err, response) => {
+                err && done(err);
+                idUser = response.body._id;
+                console.log({idUser})
+                done();
+            })
+        
+    })
+
+    it("UPDATE - profile user" , (done) => {
+        const userData = {
+            name: "UserSupertest",
+            lastName: "TestUser",
+            address: "direccion from test",
+        }
+
+        api.put('/api/user/update/profile')
+            .set("Authorization", `Bearer ${userToken}`)
+            .send(userData)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(201)
+            .end((err, response) => {
+                err && done(err);
+                done();
+            })
+        
     })
 
     it("DELETE - test user" , done => {
-        api.delete("/api/user/")
+        api.delete("/api/user/delete/"+idUser)
+            .set("Authorization", `Bearer ${adminToken}`)
+            .expect(201)
+            .end(err => {
+                err && done(err);
+                done();
+            })
+    })
+
+    it("DELETE - user does not exist" , done => {
+        api.delete("/api/user/delete/6443asdasdad")
+            .set("Authorization", `Bearer ${adminToken}`)
+            .expect(404)
+            .end((err, res) => {
+                // expect(res.status).to.equal(403);
+                expect(res.body).to.deep.equal({
+                    message: "Usuario no encontrado"
+                })
+                done();
+            })
+    })
+
+    it("DELETE - without admin token" , done => {
+        api.delete("/api/user/delete/"+idUser)
+            .expect(401)
+            .end((err, res) => {
+                // expect(res.status).to.equal(403);
+                expect(res.body).to.deep.equal({
+                    message: "No se proporciono un token de autorizacion"
+                })
+                done();
+            })
     })
 
     it("Profile - respond with json containing a single profile", done => {
