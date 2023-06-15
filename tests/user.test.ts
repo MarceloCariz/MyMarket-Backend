@@ -53,7 +53,6 @@ describe("Users Tests", () => {
             .end((err, response) => {
                 err && done(err);
                 idUser = response.body._id;
-                console.log({idUser})
                 done();
             })
         
@@ -94,7 +93,6 @@ describe("Users Tests", () => {
             .set("Authorization", `Bearer ${adminToken}`)
             .expect(404)
             .end((err, res) => {
-                // expect(res.status).to.equal(403);
                 expect(res.body).to.deep.equal({
                     message: "Usuario no encontrado"
                 })
@@ -106,7 +104,6 @@ describe("Users Tests", () => {
         api.delete("/api/user/delete/"+idUser)
             .expect(401)
             .end((err, res) => {
-                // expect(res.status).to.equal(403);
                 expect(res.body).to.deep.equal({
                     message: "No se proporciono un token de autorizacion"
                 })
@@ -140,6 +137,3 @@ describe("Users Tests", () => {
 
 
 
-// afterAll(() => {
-//     server.close();
-// })
