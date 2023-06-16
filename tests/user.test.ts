@@ -30,7 +30,7 @@ before(async() => {
 
 describe("Users Tests", () => {
     
-    it('users are returned as json', done => {
+    it('GET - users are returned as json', done => {
         api.get("/api/user")
         .set("Accept", "application/json")
         .expect("Content-Type",/json/)

@@ -47,7 +47,7 @@ export const deleteCategory = async(req:Request, res: Response) => {
         if(!isCategory) return res.status(HTTP_RESPONSE.NotFound).json({message:"La categoría no existe"}); 
 
         await isCategory.deleteOne();
-        res.json({message: 'Eliminada correctamente'})
+        res.status(HTTP_RESPONSE.Created).json({message: 'Eliminada correctamente'})
 
     } catch (error) {
         console.log(error)
