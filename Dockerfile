@@ -1,7 +1,7 @@
-FROM node:18.16.0-alpine
+FROM node:alpine3.15 as builder
 
 WORKDIR /backend
-
+COPY . .
 COPY package.json /backend
 
 RUN yarn install
