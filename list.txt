@@ -1,0 +1,13 @@
+
+
+
+FRONT - AI
+CAmbiar tema y colores de la interfaz
+Crear componente Card con la informacion de la tecnologia
+Por hacer: Arreglar responsive, corregir colores menu despeglabe 
+
+FRONT - CV - analyzer
+Template para cv, drag and drop
+Visualizacion de archivos pdf y word
+Backend simple que recibe el archivo
+Por hacer: arreglar responsive, ajustar mejor el tamaño de visualziaicon de los archivos

@@ -20,6 +20,8 @@ before(async() => {
 
 
 describe("Category Tests", () => { 
+
+    
     it('GET all categories - return a json with all categories', done => {
         api.get("/api/category")
         .set("Accept", "application/json")
