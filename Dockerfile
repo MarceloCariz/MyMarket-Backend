@@ -1,15 +1,19 @@
 FROM node:alpine3.15 as builder
 
+
+
+RUN yarn global add typescript
 WORKDIR /backend
 COPY . .
-COPY package.json /backend
+
 
 RUN yarn install
 
-COPY . /backend
+RUN yarn build
 
-EXPOSE 4000
 
-CMD [ "yarn", "dev"]
+
+
+CMD [ "yarn","start"]
 
 
