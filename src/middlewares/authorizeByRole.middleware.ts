@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { RolesEnum } from "../enums/user.enum";
-import { UserI } from "../models/User";
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 export interface AuthenticatedRequest extends Request {
     uid?: string;
@@ -13,12 +13,12 @@ const authorizeRole = (requiredRole: RolesEnum) => {
 
         const userRole = req.roles; 
 
-        if(userRole?.length === 0 || userRole === undefined) return res.status(400).json({message: "No hay roles"})
+        if(userRole?.length === 0 || userRole === undefined) return res.status(HTTP_RESPONSE.BadRequest).json({message: "No hay roles"})
 
         if (userRole.includes(requiredRole)) {
             next(); // El usuario tiene el rol adecuado, continúa con la siguiente función de middleware o controlador
         } else {
-            res.status(403).json({ message: "Acceso denegado" }); 
+            res.status(HTTP_RESPONSE.Forbidden).json({ message: "Acceso denegado" }); 
            // El usuario no tiene el rol adecuado, devuelve un error de acceso denegado
         }
     };

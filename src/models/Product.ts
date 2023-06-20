@@ -1,6 +1,7 @@
 import { Schema, SchemaDefinitionProperty, model } from "mongoose";
 
 export interface ProductI{
+    _id?: string,
     title:string,
     description: string,
     imgUrl: string,
@@ -8,7 +9,8 @@ export interface ProductI{
     stock: Number,
     shop: SchemaDefinitionProperty<string>,
     publicId: string,
-    category?: string[],
+    category: SchemaDefinitionProperty<string>,
+    categoryName?: string,
 }
 
 
@@ -40,6 +42,11 @@ const ProductSchema = new  Schema<ProductI>({
     shop:{
         type: Schema.Types.ObjectId,
         ref: "Shop",
+        required: true,
+    },
+    category:{
+        type: Schema.Types.ObjectId,
+        ref: "Category",
         required: true,
     }
 });

@@ -1,9 +1,12 @@
-import { Request, Response } from "express";
+import {  Request, Response } from "express";
 import Product, { ProductI } from "../models/Product";
 import Shop, { ShopI } from "../models/Shop";
 import { isObjectIdOrHexString } from "mongoose";
 import cloudinary from "../utils/cloudinary.config";
 import { AuthenticatedRequest } from "../middlewares/authorizeByRole.middleware";
+import Category, { CategoryI } from "../models/Category";
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
+import { JWTRequestI } from "../middlewares/checkJWT.middleware";
 
 
 
@@ -11,18 +14,23 @@ export const createProduct = async (req: Request,res: Response) => {
     try {
 
         
-        const {shop} = req.body;
+        const {shop, category} = req.body;
 
-        const file:any = req.file;
+        const file = req.file;
 
-        if(!file) return res.status(404).json({message: "Imagen no encontrada"});
+        if(!file) return res.status(HTTP_RESPONSE.NotFound).json({message: "Imagen no encontrada"});
 
         //Verficar el id de la tienda
         const isShop = await Shop.findById(shop);
-        if(!isShop) return res.status(404).json({message:`Comercio con el id: ${shop} no encontrado`});
+        if(!isShop) return res.status(HTTP_RESPONSE.NotFound).json({message:`Comercio con el id: ${shop} no encontrado`});
+
+        //Verificar el id de la categoria
+        if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
+        const isCategory = await Category.findById(category);
+        if(!isCategory) return res.status(HTTP_RESPONSE.NotFound).json({message:`Categoria con el id: ${category} no encontrado`});
 
 
-        if(!req.file?.path) return  res.status(404).json({message: "Imagen no encontrada"});
+        if(!req.file?.path) return  res.status(HTTP_RESPONSE.NotFound).json({message: "Imagen no encontrada"});
         
         //Subir imagen cloudinary
         const cloudinaryResponse = await cloudinary.uploader.upload(req.file?.path, {
@@ -55,22 +63,30 @@ export const createProduct = async (req: Request,res: Response) => {
                 {$push: {products: product._id}},
                 {new: true}
         )
-        res.status(201).json(product)
+        const {categoryName} = isCategory;
+
+        const productResponse = { ...product.toObject(), categoryName};
+
+        res.status(HTTP_RESPONSE.Created).json(productResponse);
     } catch (error) {
         console.log(error)
-        res.status(500).json({message:"Interal server error"})
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Interal server error"})
     }
 }
 
 export const updateProduct = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const productId = req.params.productId;
-        // const {title, description, price, stock} = req.body;
+        const {category} = req.body;
 
         // Validar si 
         const product = await Product.findById(productId);
         if(!product) return res.status(404).json({message:"Producto no encontrado"});
 
+        // Encontrar categoria
+        if(!isObjectIdOrHexString(category)) return res.status(400).json({message:`id: ${category} formato incorrecto`});
+        const isCategory = await Category.findById(category);
+        if(!isCategory) return res.status(404).json({message:`Categoria con el id: ${category} no encontrado`});
 
         const file:any = req.file; // imagen
 
@@ -91,11 +107,15 @@ export const updateProduct = async(req: AuthenticatedRequest, res: Response) => 
             await product.save();
         }
 
-        const productUpdated = await Product.findByIdAndUpdate(productId, {...req.body}, {new: true});
+        const productUpdated= await Product.findByIdAndUpdate(productId, {...req.body}, {new: true});
+        const {categoryName} = isCategory;
 
-        res.status(201).json(productUpdated)
+        const productResponse = { ...productUpdated?.toObject(), categoryName};
+
+        res.status(HTTP_RESPONSE.Created).json(productResponse)    
     } catch (error) {
         console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Interal server error"})
     }
 }
 
@@ -106,7 +126,7 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
         
         //Verificar si la tienda existe por ende el producto 
         const isOwnerProduct = await Shop.findById(userId);
-        if(!isOwnerProduct) return res.status(404).json({message: "Producto no encontrado"});
+        if(!isOwnerProduct) return res.status(HTTP_RESPONSE.NotFound).json({message: "Producto no encontrado"});
 
         //Verificar si el producto a elminar pertenece a la tienda
         const isProduct = isOwnerProduct?.products.find((p:any) => p._id.toString() === productId && p);
@@ -131,28 +151,23 @@ export const deleteProduct = async(req: AuthenticatedRequest, res: Response) => 
 }
 
 
-export const getProductByShop = async(req: Request, res: Response) => {
+export const getProductByShop = async(  req: Request, res: Response) => {
     try {
         const {shopId} = req.params;
 
         if(!isObjectIdOrHexString(shopId)) return res.status(404).json({message:"Id del comercio incorrecto"});
 
         //Buscar el comercio por el id
-        const shop = await Shop.findById(shopId).populate({
-            path: "products",
-            populate:{
-                path: "shop",
-                select: "shopName"
-            }
-        });
-        if(!shop){
-            return res.status(404).json({message:"Aun no tienes productos"})
-        }
+        const shop = await Shop.findById(shopId);
+        if(!shop) return res.status(HTTP_RESPONSE.NotFound).json({message:"El comercio no existe"});
 
-        //Obtener los productos del comercio
-        const products = shop.products;   
+        const products = await Product.find({'shop': shopId}).populate("shop").populate("category");
 
-        res.status(200).json(products);
+        const formateddProducts = productResponseFormat(products);
+
+
+
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
 
     } catch (error) {
         console.log(error)
@@ -165,55 +180,83 @@ export const getAllProductsByShop = async (req: Request, res: Response) => {
     try {
 
 
-        const products = await Product.find({}).populate("shop");
+        const products = await Product.find({}).populate("shop").populate("category");
 
-        const formateddProducts = products.map((product) => {
-            const {_id, title, price, description, stock, shop, imgUrl} = product;
 
-            const shopInfo:any = shop
-            
-            return {_id, title, price, description, imgUrl,  stock, shopName: shopInfo.shopName, shopId: shopInfo._id }
-        })
-
-        
-
+        const formateddProducts = productResponseFormat(products);
     
-        res.status(200).json(formateddProducts);
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Interal server error" });
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Interal server error" });
     }
 };
 
 
+export const searchProduct = async(req:Request, res:Response) => {
+    try {
+        const query = req.query.q;
+        if(!query) return res.status(HTTP_RESPONSE.NotFound).json({message: "No se proporciono parametro de busqueda"});
+        const searchValue = query.toString();
+                
+        const regex = new RegExp(searchValue, 'i');
+
+        const products = await Product.find({'title': {$regex: regex}}).populate("shop").populate("category");
+
+        
+        const formateddProducts = productResponseFormat(products);
+
+    
+        res.status(HTTP_RESPONSE.OK).json(formateddProducts);
+
+    } catch (error) {
+        console.log(error)
+        res.status(HTTP_RESPONSE.InternalServerError).json({ message: "Interal server error" });
+    }
+}
+
+
+export const getCart = async(req:JWTRequestI, res:Response) => {
+    try {
+        const cookiesCart = req.cookies[`cart-${req.uid}`]
+        const cartArray:ProductI[] = [];
+        const cartIds = cookiesCart ? JSON.parse(cookiesCart).map((cart:{_id:string}) => (cart._id)) : [];
+        for (const idProduct of cartIds) {
+            const product = await Product.findById(idProduct);
+            const productInfo = JSON.parse(cookiesCart).find((p:ProductI) => (p._id === idProduct));
+
+            const newProduct = {
+                ...productInfo,
+                price: product?.price,
+                stock: product?.stock,
+                title: product?.title,
+                imgUrl: product?.imgUrl
+            }
+            cartArray.push(newProduct);
+        }
+
+        res.send(cartArray);
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+const productResponseFormat = (products: ProductI[]) => {
+    const formattedProducts = products.map((product:ProductI) => {
+        const {_id, title, price, description, stock, shop, imgUrl, category:categoryInfo} = product;
+
+        const {shopName, _id:shopId} = shop as ShopI;
+        const {categoryName, _id:category} = categoryInfo as CategoryI;
+
+        return {_id, title, price, description, imgUrl,  stock, shopName, shopId , 
+            categoryName, category}
+    })
+    return formattedProducts;
+}
 
 
 
-      // Realizar la agregación para agrupar los productos por comercio
-        // const products = await Product.aggregate([
-        //     {
-        //         $group: {
-        //             _id: "$shop",
-        //             productos: { $push: "$$ROOT" }
-        //         },
-        //     }
-        // ]);
 
-// {
-//     $lookup: {
-//         from: "shops", // Nombre de la colección de comercios
-//         localField: "_id",
-//         foreignField: "_id",
-//         as: "comercio"
-//     }
-// },
-// {
-//     $unwind: "$comercio"
-// },
-// {
-//     $project: {
-//         _id: 0, // Excluir el campo _id de los resultados
-//         comercio: "$comercio.username", // Mostrar el campo "nombre" del comercio
-//         productos: 1 // Mantener el campo "productos" en los resultados
-//     }
-// }
+

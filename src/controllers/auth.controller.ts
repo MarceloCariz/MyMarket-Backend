@@ -4,6 +4,7 @@ import User from "../models/User";
 import { generateJWT } from "../helpers/jwt";
 import { JWTRequestI } from "../middlewares/checkJWT.middleware";
 import Shop from "../models/Shop";
+import { HTTP_RESPONSE } from "../enums/httpErrors.enum";
 
 
 export const login = async(req: Request, res: Response) => {
@@ -22,7 +23,7 @@ export const login = async(req: Request, res: Response) => {
         }
 
         if(!user){ 
-            return res.status(401).json({message:"Email o contraseña incorrecto"})
+            return res.status(HTTP_RESPONSE.Unauthorized).json({message:"Email o contraseña incorrecto"})
         };
 
 
@@ -30,21 +31,18 @@ export const login = async(req: Request, res: Response) => {
         //Validar passoword
         const validPassword = bcrypt.compareSync(password, user.password);
 
-        if(!validPassword) return res.status(401).json({message:"Email o contraseña incorrecto"});
+        if(!validPassword) return res.status(HTTP_RESPONSE.Unauthorized).json({message:"Email o contraseña incorrecto"});
 
         //Generar jwt
         const token = await generateJWT({uid: user.id, username: user.username, roles: user.roles});
 
         res.json({
-            // uid: user.id,
-            // username: user.username,
-            // roles: user.roles,
             token
         })
 
         
     } catch (error) {
-        res.status(500).json({message:"Internal server error"})
+        res.status(HTTP_RESPONSE.InternalServerError).json({message:"Internal server error"})
     }
 }
 
@@ -70,7 +68,7 @@ export const revalidateToken = async(req: JWTRequestI, res: Response) => {
             user = isShop;
         }
 
-        if(!user) return res.status(400).json({message: "Usuario no encontrado, no se puede revalidar el token"})
+        if(!user) return res.status(HTTP_RESPONSE.BadRequest).json({message: "Usuario no encontrado, no se puede revalidar el token"})
 
         const token = await generateJWT({uid, username, roles});
 
@@ -81,12 +79,7 @@ export const revalidateToken = async(req: JWTRequestI, res: Response) => {
             token
         })
     } catch (error) {
-        res.status(400).json({message: "Usuario no encontrado, no se puede revalidar el token"})
+        res.status(HTTP_RESPONSE.BadRequest).json({message: "Usuario no encontrado, no se puede revalidar el token"})
     }
-
-
-
-
-
 
 }

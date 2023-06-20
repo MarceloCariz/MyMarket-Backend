@@ -7,6 +7,8 @@ export interface ProfileI {
     lastName: string;
     address: string;
     publicId: string; /// id cloudinary image
+    longitude: number;
+    latitude: number;
 }
 
 
@@ -25,6 +27,12 @@ const ProfileSchema = new Schema<ProfileI>({
     },
     publicId:{
         type: String
+    },
+    longitude: {
+        type: Number
+    },
+    latitude: {
+        type: Number
     }
 
 });
