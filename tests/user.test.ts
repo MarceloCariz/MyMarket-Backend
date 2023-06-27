@@ -58,6 +58,50 @@ describe("Users Tests", () => {
         
     })
 
+    it("POST-ERROR - user exists return error" , (done) => {
+        const userData = {
+            email: "testTDDUser@correo.com",
+            username: "TestUser",
+            password: "12345678",
+            roles: ["user"]
+        }
+
+        api.post('/api/user/create')
+            .send(userData)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(400)
+            .end((err, res) => {
+                expect(res.body).to.deep.equal({
+                    message: "El usuario ya existe"
+                })
+                done();
+            })
+        
+    })
+
+    it("POST-ERROR - shop exists return error" , (done) => {
+        const userData = {
+            email: "shop@correo.com",
+            username: "TestUser",
+            password: "12345678",
+            roles: ["shop"]
+        }
+
+        api.post('/api/user/create')
+            .send(userData)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(400)
+            .end((err, res) => {
+                expect(res.body).to.deep.equal({
+                    message: "El usuario ya existe"
+                })
+                done();
+            })
+        
+    })
+
     it("UPDATE - profile user" , (done) => {
         const userData = {
             name: "UserSupertest",
@@ -87,6 +131,7 @@ describe("Users Tests", () => {
                 done();
             })
     })
+
 
     it("DELETE - user does not exist" , done => {
         api.delete("/api/user/delete/6443asdasdad")
